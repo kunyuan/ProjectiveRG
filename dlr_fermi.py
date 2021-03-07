@@ -24,17 +24,25 @@ def kernelWn(E, n, beta):
 
 beta = 1000.0
 wmax = 10.0
+Lambda = beta*wmax
 
-dlr = np.loadtxt("dlr.dat")
-wGrid = dlr[:, 1]  # real frequency grid
-tauGrid = dlr[:, 2]  # tau grid
+dlr = np.loadtxt("dlr/fermi/dlr{0}.dat".format(int(Lambda)))
+# dlr = np.loadtxt("dlr.dat")
+wGrid = dlr[:, 1]/beta  # real frequency grid
+tauGrid = dlr[:, 2]*beta  # tau grid
+# wGrid = dlr[:, 1]  # real frequency grid
+# tauGrid = dlr[:, 2]  # tau grid
 wnGrid = dlr[:, 3]  # Matsubara frequency grid
 
 # transfer tau from (-beta/2, beta/2) to (0, beta)
-for ti, t in enumerate(dlr[:, 2]):
+for ti, t in enumerate(tauGrid):
     if t < 0.0:
         tauGrid[ti] = t+beta
 tauGrid = np.sort(tauGrid)
+
+print("wgrid:", wGrid)
+print("taugrid:", tauGrid)
+print("wngrid:", wnGrid)
 
 # demonstrate how to use the tau grid
 transfer = np.zeros((len(tauGrid), len(wGrid)))
@@ -60,7 +68,7 @@ plt.plot(coeff)
 print("G(tau) difference: ", np.max(transfer @ coeff - G))
 
 # test Matsurbara frequency representation:
-nlist = np.array(range(20000))-10000
+nlist = np.array(range(200))-100
 Gw = 1.0/(1j*(2.0*nlist+1.0)*np.pi/beta+E)
 
 Gwdlr = np.zeros(len(nlist))+0.0*1j
@@ -70,7 +78,10 @@ for ni, n in enumerate(nlist):
 plt.figure()
 plt.plot(nlist, Gw.imag, label="Gw")
 plt.plot(nlist, Gwdlr.imag, label="Gwdlr")
+# plt.plot(nlist, Gw.real, label="Gw")
+# plt.plot(nlist, Gwdlr.real, label="Gwdlr")
 plt.legend()
 # plt.show()
 
 print("G(iwn) difference: ", np.max(np.abs(Gwdlr-Gw)))
+# print("G(iwn) difference: ", Gwdlr-Gw)
